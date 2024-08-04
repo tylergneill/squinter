@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Comparison Tool</title>
+    <style>
+        .container { max-width: 800px; margin: auto; padding: 20px; }
+        .content-editable { width: 100%; min-height: 40px; margin-bottom: 10px; padding: 10px; border: 1px solid #ccc; white-space: pre-wrap; }
+        .file-input { margin-bottom: 10px; }
+        .button-container { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>File Comparison Tool</h1>
+        <form method="post" enctype="multipart/form-data">
+            <div class="file-input">
+                <label for="file1">Select First File:</label>
+                <input type="file" id="file1" name="file1" required>
+            </div>
+            <div class="file-input">
+                <label for="file2">Select Second File:</label>
+                <input type="file" id="file2" name="file2" required>
+            </div>
+            <div class="button-container">
+                <button type="submit">Compare</button>
+            </div>
+        </form>
+        <form method="post">
+            <div class="button-container">
+                <button type="submit" name="action" value="Previous">Previous</button>
+                <button type="submit" name="action" value="Next">Next</button>
+                <button type="submit" name="action" value="Refresh">Refresh</button>
+            </div>
+        </form>
+        <div class="content-editable" id="file1">{{ file1|safe }}</div>
+        <div class="content-editable
