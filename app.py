@@ -64,11 +64,14 @@ def highlight_character_differences(word_pairs):
 def compute_second_tier_differences(text1, text2):
     words1 = text1.split()
     words2 = text2.split()
-    breakpoint()
     aligned1, aligned2 = needleman_wunsch(words1, words2)
     word_pairs = []
-    for word1, word2 in zip(aligned1, aligned2):
-        word_pairs.append((word1, word2))
+    for i, (word1, word2) in enumerate(zip(aligned1, aligned2)):
+        if word1 == word2 and i != 0:
+            blank_word = '_' * (len(word1)//2)
+            word_pairs.append((blank_word, blank_word))
+        else:
+            word_pairs.append((word1, word2))
     return word_pairs
 
 @app.route('/', methods=['GET', 'POST'])
@@ -83,7 +86,6 @@ def index():
             file2_path = os.path.join('uploads', file2.filename)
             file1.save(file1_path)
             file2.save(file2_path)
-            breakpoint()
             file1_excerpt = get_first_x_percent_lines(read_file(file1_path), EXCERPT_PERCENTAGE)
             file2_excerpt = get_first_x_percent_lines(read_file(file2_path), EXCERPT_PERCENTAGE)
             first_tier_differences = compute_first_tier_differences(file1_excerpt, file2_excerpt)
