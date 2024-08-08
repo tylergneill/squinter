@@ -11,7 +11,6 @@
 </head>
 <body>
     <div class="container">
-        <h1>File Comparison Tool</h1>
         <form method="post" enctype="multipart/form-data">
             <div class="file-input">
                 <label for="file1">Select First File:</label>
@@ -25,15 +24,14 @@
                 <button type="submit">Compare</button>
             </div>
         </form>
+        <div class="content-editable" id="file1">{{ file1|safe }}</div>
+        <div class="content-editable" id="file2">{{ file2|safe }}</div>
         <form method="post">
             <div class="button-container">
                 <button type="submit" name="action" value="Previous">Previous</button>
                 <button type="submit" name="action" value="Next">Next</button>
-                <button type="submit" name="action" value="Refresh">Refresh</button>
             </div>
         </form>
-        <div class="content-editable" id="file1">{{ file1|safe }}</div>
-        <div class="content-editable" id="file2">{{ file2|safe }}</div>
     </div>
 </body>
 </html>
