@@ -45,48 +45,55 @@ def get_differing_line_pairs(file1, file2):
     text2 = [line[2:] for line in differing_lines[1::2]]
     return list(zip(text1, text2))
 
+def is_roughly_equal(s1: str, s2: str, threshold: float = 0.1) -> bool:
+    distance = Levenshtein.distance(s1, s2)
+    max_len = max(len(s1), len(s2))
+    proportional_distance = distance / max_len
+    return proportional_distance <= threshold
+
+def adjust_alignment(aligned1, aligned2):
+    adjusted1 = []
+    adjusted2 = []
+    i = 0
+    while i < len(aligned1):
+        word1 = aligned1[i]
+        word2 = aligned2[i]
+
+        # Check if the current and next word need adjustment
+        if word1 == '-' and i + 1 < len(aligned1):
+            next_word1 = aligned1[i + 1]
+            combined_word2 = word2 + ' ' + aligned2[i + 1] if i + 1 < len(aligned2) else word2
+            if next_word1.replace(' ', '') == combined_word2.replace(' ', ''):
+                adjusted1.append(next_word1)
+                adjusted2.append(combined_word2)
+                i += 1  # Skip the next word as it's now combined
+            else:
+                adjusted1.append(word1)
+                adjusted2.append(word2)
+        elif word2 == '-' and i + 1 < len(aligned2):
+            next_word2 = aligned2[i + 1]
+            combined_word1 = word1 + ' ' + aligned1[i + 1] if i + 1 < len(aligned1) else word1
+            # if next_word2.replace(' ', '') == combined_word1.replace(' ', ''):
+            if is_roughly_equal(next_word2.replace(' ', ''), combined_word1.replace(' ', '')):
+                adjusted2.append(next_word2)
+                adjusted1.append(combined_word1)
+                i += 1  # Skip the next word as it's now combined
+            else:
+                adjusted1.append(word1)
+                adjusted2.append(word2)
+        else:
+            adjusted1.append(word1)
+            adjusted2.append(word2)
+        i += 1
+
+    return adjusted1, adjusted2
+
 def extract_significant_differences(line_pair):
     if not line_pair:
         return "", ""
     words1 = line_pair[0].split()
     words2 = line_pair[1].split()
     aligned1, aligned2 = needleman_wunsch(words1, words2)
-
-    def adjust_alignment(aligned1, aligned2):
-        adjusted1 = []
-        adjusted2 = []
-        i = 0
-        while i < len(aligned1):
-            word1 = aligned1[i]
-            word2 = aligned2[i]
-
-            # Check if the current and next word need adjustment
-            if word1 == '-' and i + 1 < len(aligned1):
-                next_word1 = aligned1[i + 1]  #
-                combined_word2 = word2 + ' ' + aligned2[i + 1] if i + 1 < len(aligned2) else word2
-                if next_word1.replace(' ', '') == combined_word2.replace(' ', ''):
-                    adjusted1.append(next_word1)
-                    adjusted2.append(combined_word2)
-                    i += 1  # Skip the next word as it's now combined
-                else:
-                    adjusted1.append(word1)
-                    adjusted2.append(word2)
-            elif word2 == '-' and i + 1 < len(aligned2):
-                next_word2 = aligned2[i + 1]  #
-                combined_word1 = word1 + ' ' + aligned1[i + 1] if i + 1 < len(aligned1) else word1
-                if next_word2.replace(' ', '') == combined_word1.replace(' ', ''):
-                    adjusted2.append(next_word2)
-                    adjusted1.append(combined_word1)
-                    i += 1  # Skip the next word as it's now combined
-                else:
-                    adjusted1.append(word1)
-                    adjusted2.append(word2)
-            else:
-                adjusted1.append(word1)
-                adjusted2.append(word2)
-            i += 1
-
-        return adjusted1, adjusted2
 
     aligned_adjusted1, aligned_adjusted2 = adjust_alignment(aligned1, aligned2)
 
