@@ -5,3 +5,12 @@ squinter takes the strain out of comparing near-exact versions of text with long
 
 ![mascot](starch_mascot.jpg)
 (English lexicographer Samuel Johnson, expert squinter)
+
+# example usage
+```bash
+python app.py --use-local-mode \
+--local-filepath1 "/path/to/file1.txt" \
+--local-filepath2 "/path/to/file2.txt" \
+--start-percentage 10 \
+--end-percentage 20
+```
