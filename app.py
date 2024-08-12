@@ -9,6 +9,7 @@ from nw import needleman_wunsch
 app = Flask(__name__)
 
 # Global variables to store file paths and differences
+# TODO: generalize using session once actually using non-local mode
 file1_path = ""
 file2_path = ""
 differing_line_pairs = []
