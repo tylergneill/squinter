@@ -10,7 +10,7 @@ Squinter takes the strain out of comparing near-exact versions of text with long
 While comparing and merging two digitizations of a particular (Sanskrit) text containing very long words, I became tired of how BBEdit's "compare" function, which I otherwise like for merging files, does not distinguish differences below the level of individual words. I needed to know which individual characters differed, without being distracted by the rest of the line. 
 
 # screenshot
-![screenshot](imgs/screenshot.jpg)
+![screenshot](imgs/screenshot.jpg?)
 Squinter is above, in the browser, 
 Preview is open in the middle with the PDF image, 
 and BBEdit is open below. 
