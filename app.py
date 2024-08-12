@@ -215,11 +215,11 @@ def index():
     template_name = 'index_hardcoded.html' if HARDCODED_MODE else 'index.html'
     return render_template(
         template_name,
-        file1=highlighted1,
-        file2=highlighted2,
+        file1_text=highlighted1,
+        file2_text=highlighted2,
         index=current_index,
-        file1_path=file1_path,
-        file2_path=file2_path
+        file1_label=os.path.basename(file1_path),
+        file2_label=os.path.basename(file2_path),
     )
 
 if __name__ == '__main__':

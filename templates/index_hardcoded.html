@@ -3,22 +3,29 @@
 <head>
     <title>Squinter</title>
     <style>
-        .container { max-width: 800px; margin: auto; padding: 20px; }
-        .content-editable { width: 100%; min-height: 40px; margin-bottom: 10px; padding: 10px; border: 1px solid #ccc; white-space: pre-wrap; }
-        .file-input { margin-bottom: 10px; }
-        .button-container { margin-top: 10px; }
+        .container { max-width: 800px; margin: auto; padding: 5px; display: flex; justify-content: space-between;}
+        .text-box { width: 90%; min-height: 30px; padding: 10px; border: 1px solid #ccc; white-space: pre-wrap; }
+        .label-box { width: 10%; min-height: 30px; padding: 5px; white-space: pre-wrap; font-size: x-small; color: rgb(128, 128, 128);}
+        .button-container { }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="content-editable" id="file1">{{ file1|safe }}</div>
-        <div class="content-editable" id="file2">{{ file2|safe }}</div>
+        <div class="text-box" id="file1">{{ file1_text|safe }}</div>
+        <div class="label-box" id="label1">{{ file1_label|safe }}</div>
+    </div>
+    <div class="container">
+        <div class="text-box" id="file2">{{ file2_text|safe }}</div>
+        <div class="label-box" id="label2">{{ file2_label|safe }}</div>
+    </div>
+    <div class="container">
         <form method="post">
             <div class="button-container">
                 <button type="submit" name="action" value="Previous">Previous</button>
                 <button type="submit" name="action" value="Next">Next</button>
             </div>
         </form>
+    </div>
     </div>
 </body>
 </html>
