@@ -104,6 +104,18 @@ def attempt_realignment(words1, words2):
 
     return adjusted1, adjusted2
 
+def realign(a, b):
+    """
+    Persist until no more realignment can be done
+    """
+    while True:
+        res = attempt_realignment(a, b)
+        if res == (a, b):
+            break
+        else:
+            a, b = res
+    return a, b
+
 def extract_significant_differences(line_pair):
     if not line_pair:
         return "", ""
