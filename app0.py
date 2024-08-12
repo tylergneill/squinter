@@ -31,8 +31,8 @@ HTML_TEMPLATE = '''
 <head>
     <title>String Difference Highlighter</title>
     <style>
-        .container { max-width: 800px; margin: auto; padding: 20px; }
-        .content-editable { width: 100%; min-height: 40px; margin-bottom: 10px; padding: 10px; border: 1px solid #ccc; white-space: pre-wrap; }
+        .container { max-width: 800px; margin: auto; padding: 10px; }
+        .content-editable { width: 100%; min-height: 30px; margin-bottom: 10px; padding: 10px; border: 1px solid #ccc; white-space: pre-wrap; }
     </style>
 </head>
 <body>
