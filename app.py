@@ -13,14 +13,21 @@ file2_path = ""
 differing_line_pairs = []
 current_index = 0
 
-HARDCODED_MODE = True
-INPUT_PATH = "/Users/tyler/Library/CloudStorage/Dropbox/Docs/Projects/Computational/Digitizations/bāṇa_kādambarī/5_merge"
-HARDCODED_FILE1_PATH = os.path.join(INPUT_PATH, "1_Andrew_derived.txt")
-HARDCODED_FILE2_PATH = os.path.join(INPUT_PATH, "2_Tylers_new.txt")
+import argparse
 
-# Set these to the desired percentage for truncation
-START_PERCENTAGE = 9
-END_PERCENTAGE = 20
+parser = argparse.ArgumentParser()
+parser.add_argument("--use-local-mode", help="Flag for using local mode", action='store_true')
+parser.add_argument("--local-filepath1", type=str, help="Path to the first file", required=False)
+parser.add_argument("--local-filepath2", type=str, help="Path to the second file", required=False)
+parser.add_argument("--start-percentage", type=int, help="Percentage of the file to start from", required=False)
+parser.add_argument("--end-percentage", type=int, help="Percentage of the file to end at", required=False)
+args = parser.parse_args()
+
+HARDCODED_MODE = args.use_local_mode
+HARDCODED_FILE1_PATH = args.local_filepath1
+HARDCODED_FILE2_PATH = args.local_filepath2
+START_PERCENTAGE = args.start_percentage
+END_PERCENTAGE = args.end_percentage
 
 def read_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
