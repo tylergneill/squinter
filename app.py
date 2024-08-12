@@ -28,8 +28,8 @@ args = parser.parse_args()
 HARDCODED_MODE = args.use_local_mode
 HARDCODED_FILE1_PATH = args.local_filepath1
 HARDCODED_FILE2_PATH = args.local_filepath2
-START_PERCENTAGE = args.start_percentage
-END_PERCENTAGE = args.end_percentage
+START_PERCENTAGE = args.start_percentage or 15
+END_PERCENTAGE = args.end_percentage or 50
 
 def read_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
