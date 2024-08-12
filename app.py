@@ -60,40 +60,47 @@ def is_roughly_equal(s1: str, s2: str, threshold: float = 0.1) -> bool:
     proportional_distance = distance / max_len
     return proportional_distance <= threshold
 
-def adjust_alignment(aligned1, aligned2):
+def attempt_realignment(words1, words2):
+    """
+    Attempt to combine two elements of one list (the larger list, if applicable) to match other list
+    """
     adjusted1 = []
     adjusted2 = []
-    i = 0
-    while i < len(aligned1):
-        word1 = aligned1[i]
-        word2 = aligned2[i]
 
-        # Check if the current and next word need adjustment
-        if word1 == '-' and i + 1 < len(aligned1):
-            next_word1 = aligned1[i + 1]
-            combined_word2 = word2 + ' ' + aligned2[i + 1] if i + 1 < len(aligned2) else word2
-            if next_word1.replace(' ', '') == combined_word2.replace(' ', ''):
-                adjusted1.append(next_word1)
-                adjusted2.append(combined_word2)
-                i += 1  # Skip the next word as it's now combined
-            else:
-                adjusted1.append(word1)
-                adjusted2.append(word2)
-        elif word2 == '-' and i + 1 < len(aligned2):
-            next_word2 = aligned2[i + 1]
-            combined_word1 = word1 + ' ' + aligned1[i + 1] if i + 1 < len(aligned1) else word1
-            # if next_word2.replace(' ', '') == combined_word1.replace(' ', ''):
-            if is_roughly_equal(next_word2.replace(' ', ''), combined_word1.replace(' ', '')):
-                adjusted2.append(next_word2)
-                adjusted1.append(combined_word1)
-                i += 1  # Skip the next word as it's now combined
-            else:
-                adjusted1.append(word1)
-                adjusted2.append(word2)
+    # identify which list is smaller
+    if len(words1) < len(words2):
+        smaller_list, smaller_result_list = words1, adjusted1
+        larger_list, larger_result_list = words2, adjusted2
+    else:
+        smaller_list, smaller_result_list = words2, adjusted2
+        larger_list, larger_result_list = words1, adjusted1
+    min_len = min(len(words1), len(words2))
+
+    for i in range(min_len):
+        if is_roughly_equal(smaller_list[i], larger_list[i]):
+            smaller_result_list.append(smaller_list[i])
+            larger_result_list.append(larger_list[i])
         else:
-            adjusted1.append(word1)
-            adjusted2.append(word2)
-        i += 1
+            # if two words in larger list can be combined to match next one word in smaller list, combine and return
+            combined_word_from_larger_list = larger_list[i]
+            for j in range(i + 1, len(larger_list)):
+                combined_word_from_larger_list += ' ' + larger_list[j]
+                if is_roughly_equal(smaller_list[i], combined_word_from_larger_list):
+                    smaller_result_list.append(smaller_list[i])
+                    larger_result_list.append(combined_word_from_larger_list)
+
+                    # extend by remainders of both input lists before returning
+                    smaller_result_list.extend(smaller_list[i + 1:])
+                    larger_result_list.extend(larger_list[j + 1:])
+                    return adjusted1, adjusted2
+            else:
+                smaller_result_list.append(smaller_list[i])
+                larger_result_list.append(larger_list[i])
+
+    else:
+        # extend by remainders of both input lists if end is reached, in case of unequal lengths
+        smaller_result_list.extend(smaller_list[i + 1:])
+        larger_result_list.extend(larger_list[i + 1:])
 
     return adjusted1, adjusted2
 
@@ -102,20 +109,30 @@ def extract_significant_differences(line_pair):
         return "", ""
     words1 = line_pair[0].split()
     words2 = line_pair[1].split()
-    aligned1, aligned2 = needleman_wunsch(words1, words2)
 
-    aligned_adjusted1, aligned_adjusted2 = adjust_alignment(aligned1, aligned2)
+    words_adjusted1, words_adjusted2 = realign(words1, words2)
 
     word_pairs = []
-    for i, (word1, word2) in enumerate(zip(aligned_adjusted1, aligned_adjusted2)):
+    for i, (word1, word2) in enumerate(zip(words_adjusted1, words_adjusted2)):
         if word1 == word2 and i != 0:
             blank_word = '_' * (len(word1)//2)
             word_pairs.append((blank_word, blank_word))
         else:
             word_pairs.append((word1, word2))
+
+    # perform final check in case list lengths weren't equal
+    if len(words_adjusted1) != len(words_adjusted2):
+        for word in words_adjusted1[i + 1:]:
+            word_pairs.append((word, "-"))
+        for word in words_adjusted2[i + 1:]:
+            word_pairs.append(("-", word))
+
     return word_pairs
 
 def highlight_character_differences(word_pair):
+    """
+    Use Needleman-Wunsch to align characters and highlight differences
+    """
     if word_pair == ("", ""):
         return "", ""
     highlighted1, highlighted2 = [], []
@@ -124,9 +141,9 @@ def highlight_character_differences(word_pair):
             highlighted1.append(word1)
             highlighted2.append(word2)
         else:
-            aligned1, aligned2 = needleman_wunsch(word1, word2)
+            aligned_chars1, aligned_chars2 = needleman_wunsch(word1, word2)
             highlighted_word1, highlighted_word2 = [], []
-            for char1, char2 in zip(aligned1, aligned2):
+            for char1, char2 in zip(aligned_chars1, aligned_chars2):
                 if char1 == char2:
                     highlighted_word1.append(char1)
                     highlighted_word2.append(char2)
