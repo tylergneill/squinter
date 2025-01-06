@@ -54,53 +54,55 @@ def get_differing_line_pairs(file1, file2):
     text2 = [line[2:] for line in differing_lines[1::2]]
     return list(zip(text1, text2))
 
-def is_roughly_equal(s1: str, s2: str, threshold: float = 0.1) -> bool:
+def is_roughly_equal(s1: str, s2: str, threshold: float = 0.15) -> bool:
     distance = Levenshtein.distance(s1, s2)
     max_len = max(len(s1), len(s2))
     proportional_distance = distance / max_len
     return proportional_distance <= threshold
 
-def attempt_realignment(words1, words2):
+def attempt_realignment(words1, words2, threshold=0.15):
     """
-    Attempt to combine two elements of one list (the larger list, if applicable) to match other list
+    Attempt to align two lists by combining adjacent words in both lists as needed.
     """
-    adjusted1 = []
-    adjusted2 = []
+    adjusted1, adjusted2 = [], []
+    i, j = 0, 0
 
-    # identify which list is smaller
-    if len(words1) < len(words2):
-        smaller_list, smaller_result_list = words1, adjusted1
-        larger_list, larger_result_list = words2, adjusted2
-    else:
-        smaller_list, smaller_result_list = words2, adjusted2
-        larger_list, larger_result_list = words1, adjusted1
-    min_len = min(len(words1), len(words2))
+    while i < len(words1) and j < len(words2):
+        w1, w2 = words1[i], words2[j]
 
-    for i in range(min_len):
-        if is_roughly_equal(smaller_list[i], larger_list[i]):
-            smaller_result_list.append(smaller_list[i])
-            larger_result_list.append(larger_list[i])
+        if is_roughly_equal(w1, w2, threshold):  # Perfect match or roughly equal
+            adjusted1.append(w1)
+            adjusted2.append(w2)
+            i += 1
+            j += 1
         else:
-            # if two words in larger list can be combined to match next one word in smaller list, combine and return
-            combined_word_from_larger_list = larger_list[i]
-            for j in range(i + 1, len(larger_list)):
-                combined_word_from_larger_list += ' ' + larger_list[j]
-                if is_roughly_equal(smaller_list[i], combined_word_from_larger_list):
-                    smaller_result_list.append(smaller_list[i])
-                    larger_result_list.append(combined_word_from_larger_list)
+            # Generate combinations for words1
+            best_combined1, best_combined2, best_score = None, None, float("inf")
 
-                    # extend by remainders of both input lists before returning
-                    smaller_result_list.extend(smaller_list[i + 1:])
-                    larger_result_list.extend(larger_list[j + 1:])
-                    return adjusted1, adjusted2
+            for k in range(i + 1, len(words1) + 1):
+                combined_w1 = " ".join(words1[i:k])  # Combine up to k words in words1
+                for l in range(j + 1, len(words2) + 1):
+                    combined_w2 = " ".join(words2[j:l])  # Combine up to l words in words2
+                    score = Levenshtein.distance(combined_w1, combined_w2) / max(len(combined_w1), len(combined_w2))
+                    if score < best_score and score <= threshold:
+                        best_combined1, best_combined2, best_score = combined_w1, combined_w2, score
+
+            if best_combined1 and best_combined2:
+                # Use the best combination
+                adjusted1.append(best_combined1)
+                adjusted2.append(best_combined2)
+                i += len(best_combined1.split())
+                j += len(best_combined2.split())
             else:
-                smaller_result_list.append(smaller_list[i])
-                larger_result_list.append(larger_list[i])
+                # No valid combination, align as-is
+                adjusted1.append(w1)
+                adjusted2.append(w2)
+                i += 1
+                j += 1
 
-    else:
-        # extend by remainders of both input lists if end is reached, in case of unequal lengths
-        smaller_result_list.extend(smaller_list[i + 1:])
-        larger_result_list.extend(larger_list[i + 1:])
+    # Append any remaining words
+    adjusted1.extend(words1[i:])
+    adjusted2.extend(words2[j:])
 
     return adjusted1, adjusted2
 
