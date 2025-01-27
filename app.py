@@ -30,6 +30,7 @@ HARDCODED_FILE1_PATH = args.local_filepath1
 HARDCODED_FILE2_PATH = args.local_filepath2
 START_PERCENTAGE = args.start_percentage or 15
 END_PERCENTAGE = args.end_percentage or 50
+LEVENSHTEIN_THRESHOLD = 0.15
 
 def read_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -111,7 +112,7 @@ def realign(a, b):
     Persist until no more realignment can be done
     """
     while True:
-        res = attempt_realignment(a, b)
+        res = attempt_realignment(a, b, LEVENSHTEIN_THRESHOLD)
         if res == (a, b):
             break
         else:
