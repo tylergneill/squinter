@@ -28,22 +28,29 @@ args = parser.parse_args()
 HARDCODED_MODE = args.use_local_mode
 HARDCODED_FILE1_PATH = args.local_filepath1
 HARDCODED_FILE2_PATH = args.local_filepath2
-START_PERCENTAGE = args.start_percentage or 15
-END_PERCENTAGE = args.end_percentage or 50
+START_PERCENTAGE = args.start_percentage or 0
+END_PERCENTAGE = args.end_percentage or 100
 LEVENSHTEIN_THRESHOLD = 0.15
 
 def read_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         return file.read()
 
-def truncate_file(
-    file_content: str,
+def truncate_files(
+    file1_text: str,
+    file2_text: str,
     start_percentage: int = START_PERCENTAGE,
     end_percentage: int = END_PERCENTAGE,
 ) -> List[str]:
-    lines = file_content.split("\n")
-    truncated_lines = lines[ int(len(lines) * start_percentage / 100) : int(len(lines) * end_percentage / 100) ]
-    return '\n'.join(truncated_lines)
+    file1_lines, file2_lines = file1_text.split("\n"), file2_text.split("\n")
+    # Note: Prioritize file1 number of lines to avoid mismatch
+    truncated_lines_1 = file1_lines[
+        int(len(file1_lines) * start_percentage / 100) : int(len(file1_lines) * end_percentage / 100)
+    ]
+    truncated_lines_2 = file2_lines[
+        int(len(file1_lines) * start_percentage / 100): int(len(file1_lines) * end_percentage / 100)
+    ]
+    return '\n'.join(truncated_lines_1), '\n'.join(truncated_lines_2)
 
 def get_differing_line_pairs(file1, file2):
     lines1 = file1.split('\n')
@@ -170,8 +177,8 @@ def highlight_character_differences(word_pair):
     return ' '.join(highlighted1), ' '.join(highlighted2)
 
 def initialize(file1_path, file2_path):
-    truncated_file1 = truncate_file(read_file(file1_path))
-    truncated_file2 = truncate_file(read_file(file2_path))
+    file1_text, file2_text = read_file(file1_path), read_file(file2_path)
+    truncated_file1, truncated_file2 = truncate_files(file1_text, file2_text)
     differing_line_pairs = get_differing_line_pairs(truncated_file1, truncated_file2)
     current_index = 0
 
