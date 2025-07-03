@@ -56,14 +56,6 @@
 <!--    </script>-->
 </head>
 <body>
-    <div class="container">
-        <div class="text-box" id="file1">{{ file1_text|safe }}</div>
-        <div class="label-box" id="label1">{{ file1_label|safe }}</div>
-    </div>
-    <div class="container">
-        <div class="text-box" id="file2">{{ file2_text|safe }}</div>
-        <div class="label-box" id="label2">{{ file2_label|safe }}</div>
-    </div>
     <div class="container controls">
       <form method="post">
         <div class="button-container">
@@ -73,6 +65,14 @@
       </form>
 
       <small class="progress">Progress: {{ current_percentage }}</small>
+    </div>
+    <div class="container">
+        <div class="text-box" id="file1">{{ file1_text|safe }}</div>
+        <div class="label-box" id="label1">{{ file1_label|safe }}</div>
+    </div>
+    <div class="container">
+        <div class="text-box" id="file2">{{ file2_text|safe }}</div>
+        <div class="label-box" id="label2">{{ file2_label|safe }}</div>
     </div>
 </body>
 </html>
