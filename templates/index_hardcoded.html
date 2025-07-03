@@ -3,10 +3,45 @@
 <head>
     <title>Squinter</title>
     <style>
-        .container { max-width: 800px; margin: auto; padding: 5px; display: flex; justify-content: space-between;}
-        .text-box { width: 90%; min-height: 30px; padding: 10px; border: 1px solid #ccc; white-space: pre-wrap; }
-        .label-box { width: 10%; min-height: 30px; padding: 5px; white-space: pre-wrap; font-size: x-small; color: rgb(128, 128, 128);}
-        .button-container { }
+      .container{
+        max-width: 800px;
+        margin: auto;
+        padding: 5px;
+        display: flex;
+        justify-content: space-between;
+      }
+      .text-box{
+        width: 90%;
+        min-height: 30px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        white-space: pre-wrap;
+      }
+      .label-box{
+        width: 10%;
+        min-height: 30px;
+        padding: 5px;
+        white-space: pre-wrap;
+        font-size: x-small;
+        color: rgb(128,128,128);
+      }
+
+      /* ─────  controls row  ───── */
+      .container.controls{               /* same width / margin as the others   */
+        align-items: center;             /* vertical centring                    */
+        justify-content: flex-start;     /* keep children starting at the left   */
+      }
+      .button-container{                 /* keep the two buttons side-by-side    */
+        display: inline-flex;
+        gap: 8px;
+      }
+      /* push the progress read-out rightwards,
+         stopping at the 90 % “text-box” edge    */
+      .progress{
+        margin-left: auto;               /* eats up all space to its left        */
+        margin-right: 10%;               /* leaves the 10 % label column empty   */
+        white-space: nowrap;             /* never break onto two lines           */
+      }
     </style>
 </head>
 <body>
@@ -18,14 +53,15 @@
         <div class="text-box" id="file2">{{ file2_text|safe }}</div>
         <div class="label-box" id="label2">{{ file2_label|safe }}</div>
     </div>
-    <div class="container">
-        <form method="post">
-            <div class="button-container">
-                <button type="submit" name="action" value="Previous">Previous</button>
-                <button type="submit" name="action" value="Next">Next</button>
-            </div>
-        </form>
-    </div>
+    <div class="container controls">
+      <form method="post">
+        <div class="button-container">
+          <button type="submit" name="action" value="Previous">Previous</button>
+          <button type="submit" name="action" value="Next">Next</button>
+        </div>
+      </form>
+
+      <small class="progress">Progress: {{ current_percentage }}</small>
     </div>
 </body>
 </html>

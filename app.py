@@ -175,6 +175,22 @@ def initialize(file1_path, file2_path):
     return differing_line_pairs, current_index
 
 
+def get_current_percentage(differing_line_pairs, current_index):
+    # Compute progress through the truncated slice
+    if differing_line_pairs:
+        total_pairs = len(differing_line_pairs)
+        # avoid division by zero
+        if total_pairs > 1:
+            frac = current_index / (total_pairs - 1)
+        else:
+            frac = 0.0
+        pct = START_PERCENTAGE + (END_PERCENTAGE - START_PERCENTAGE) * frac
+        # format with up to two decimals, dropping any trailing zero
+        return f"{pct:.2f}".rstrip('0').rstrip('.') + '%'
+    else:
+        return '0%'
+
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     global file1_path, file2_path, differing_line_pairs, current_index
@@ -211,6 +227,7 @@ def index():
     current_pair = differing_line_pairs[current_index] if differing_line_pairs else []
     significant_differences = extract_significant_differences(current_pair)
     highlighted1, highlighted2 = highlight_character_differences(significant_differences)
+    current_percentage = get_current_percentage(differing_line_pairs, current_index)
 
     template_name = 'index_hardcoded.html' if HARDCODED_MODE else 'index.html'
     return render_template(
@@ -220,6 +237,7 @@ def index():
         index=current_index,
         file1_label=os.path.basename(file1_path),
         file2_label=os.path.basename(file2_path),
+        current_percentage=current_percentage,
     )
 
 if __name__ == '__main__':
