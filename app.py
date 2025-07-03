@@ -1,3 +1,4 @@
+import argparse
 import Levenshtein
 from flask import Flask, render_template, request
 import difflib
@@ -14,8 +15,8 @@ file1_path = ""
 file2_path = ""
 differing_line_pairs = []
 current_index = 0
-
-import argparse
+total_lines = 0
+slice_start_idx = 0
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--use-local-mode", help="Flag for using local mode", action='store_true')
@@ -52,15 +53,41 @@ def truncate_files(
     ]
     return '\n'.join(truncated_lines_1), '\n'.join(truncated_lines_2)
 
-def get_differing_line_pairs(file1, file2):
-    lines1 = file1.split('\n')
-    lines2 = file2.split('\n')
+def get_differing_line_pairs(file1: str, file2: str, start_offset: int = 0):
+    """
+    Return a list of tuples:
+        (line_from_file1, line_from_file2, ABSOLUTE_LINE_INDEX)
+    `start_offset` = the first line’s 0-based index inside the ORIGINAL file.
+    """
+    lines1, lines2 = file1.split("\n"), file2.split("\n")
     differ = difflib.ndiff(lines1, lines2)
-    line_diff_info = list(differ)
-    differing_lines = [line for line in line_diff_info if not (line.startswith("  ") or line.startswith("? "))]
-    text1 = [line[2:] for line in differing_lines[0::2]]
-    text2 = [line[2:] for line in differing_lines[1::2]]
-    return list(zip(text1, text2))
+
+    abs_idx = start_offset  # pointer inside the original file
+    pending_minus = None  # stash a '- ' until we see its '+ '
+    pairs = []
+
+    for d in differ:
+        tag, text = d[:2], d[2:]
+
+        if tag == '  ':  # unchanged → bump pointer
+            abs_idx += 1
+            pending_minus = None
+
+        elif tag == '- ':  # deletion from file1
+            pending_minus = (text, abs_idx)
+            abs_idx += 1  # still consumes a line in file1
+
+        elif tag == '+ ':  # insertion in file2
+            if pending_minus:  # treat -/+ together as a pair
+                line1, idx = pending_minus
+                pairs.append((line1, text, idx))
+                pending_minus = None
+            else:  # pure insertion
+                pairs.append(('', text, abs_idx))
+
+        # skip '? ' hint lines entirely
+
+    return pairs
 
 def is_roughly_equal(s1: str, s2: str, threshold: float = 0.15) -> bool:
     distance = Levenshtein.distance(s1, s2)
@@ -177,12 +204,17 @@ def highlight_character_differences(word_pair):
     return ' '.join(highlighted1), ' '.join(highlighted2)
 
 def initialize(file1_path, file2_path):
+    global total_lines, slice_start_idx
     file1_text, file2_text = read_file(file1_path), read_file(file2_path)
+    total_lines = len(file1_text.split("\n"))
+    slice_start_idx = int(total_lines * START_PERCENTAGE / 100)
     truncated_file1, truncated_file2 = truncate_files(file1_text, file2_text)
-    differing_line_pairs = get_differing_line_pairs(truncated_file1, truncated_file2)
-    current_index = 0
-
-    return differing_line_pairs, current_index
+    differing_line_pairs = get_differing_line_pairs(
+        file1=truncated_file1,
+        file2=truncated_file2,
+        start_offset=slice_start_idx
+    )
+    return differing_line_pairs, 0
 
 
 def get_current_percentage(differing_line_pairs, current_index):
@@ -234,10 +266,14 @@ def index():
             elif request.form['action'] == 'Previous':
                 current_index = max(current_index - 1, 0)
 
-    current_pair = differing_line_pairs[current_index] if differing_line_pairs else []
-    significant_differences = extract_significant_differences(current_pair)
+    current_pair_info = differing_line_pairs[current_index] if differing_line_pairs else []
+
+    abs_idx = current_pair_info[2]
+    pct = abs_idx / (total_lines - 1) * 100
+    current_percentage = f"{pct:.2f}".rstrip('0').rstrip('.') + '%'
+
+    significant_differences = extract_significant_differences(current_pair_info[:2])
     highlighted1, highlighted2 = highlight_character_differences(significant_differences)
-    current_percentage = get_current_percentage(differing_line_pairs, current_index)
 
     template_name = 'index_hardcoded.html' if HARDCODED_MODE else 'index.html'
     return render_template(
