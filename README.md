@@ -19,9 +19,9 @@ Modifications are done in BBEdit.
 # example usage
 ```bash
 python app.py --use-local-mode \
---local-filepath1 "/Users/tneill/Dropbox/Docs/Projects/Computational/Digitizations/bāṇa_kādambarī/5_merge/2_Tylers_new.txt" \
---local-filepath2 "/Users/tneill/Dropbox/Docs/Projects/Computational/Digitizations/bāṇa_kādambarī/5_merge/1_Andrew_derived.txt" \
---start-percentage 9 \
---end-percentage 20
+--local-filepath1 "/Users/tyler/Dropbox/Docs/Projects/Computational/Digitizations/bāṇa_kādambarī/5_merge/2_Tylers_new.txt" \
+--local-filepath2 "/Users/tyler/Dropbox/Docs/Projects/Computational/Digitizations/bāṇa_kādambarī/5_merge/1_Andrew_derived.txt" \
+--start-percentage 15 \
+--end-percentage 50
 ```
 
